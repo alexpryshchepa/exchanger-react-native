@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   StyleSheet,
   View,
@@ -6,18 +7,22 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class Refresh extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.primaryText}>Oops!</Text>
-        <Text style={styles.secondaryText}>Something went wrong</Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Refresh</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+export default function Refresh (props) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.primaryText}>Oops!</Text>
+      <Text style={styles.secondaryText}>Something went wrong</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={props.onPress}>
+        <Text style={styles.buttonText}>Refresh</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+Refresh.propTypes = {
+  onPress: PropTypes.func,
 }
 
 const styles = StyleSheet.create({

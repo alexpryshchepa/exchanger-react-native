@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
@@ -11,29 +11,33 @@ import {
 
 import Input from './Input';
 
-export default class Converter extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scroller}>
-          <Text style={styles.title}>Current rates</Text>
-          <Input
-            type='from'
-            currency='EUR'
-            openCurrencyList={this.props.openCurrencyList} />
-          <TouchableOpacity style={styles.invert}>
-            <Image
-              style={{width: 19, height: 24, transform: [{ rotate: '90deg'}]}}
-              source={require('../assets/images/arrows.png')} />
-          </TouchableOpacity>
-          <Input
-            type='to'
-            currency='RUB'
-            openCurrencyList={this.props.openCurrencyList} />
-        </ScrollView>
-      </View>
-    );
-  }
+export default function Converter (props) {
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scroller}>
+        <Text style={styles.title}>Current rates</Text>
+        <Input
+          type='from'
+          currency={props.currencyFrom}
+          openCurrencyList={props.openCurrencyList}
+          value={props.valueFrom}
+          setValue={props.setValueFrom} />
+        <TouchableOpacity 
+          style={styles.invert}
+          onPress={props.invertConverter}>
+          <Image
+            style={{width: 19, height: 24, transform: [{ rotate: '90deg'}]}}
+            source={require('../assets/images/arrows.png')} />
+        </TouchableOpacity>
+        <Input
+          type='to'
+          currency={props.currencyTo}
+          openCurrencyList={props.openCurrencyList}
+          value={props.valueTo}
+          setValue={props.setValueTo} />
+      </ScrollView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

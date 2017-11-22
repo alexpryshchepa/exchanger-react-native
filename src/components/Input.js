@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   StyleSheet,
   View,
@@ -8,37 +9,36 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class Input extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { 
-      text: '100',
-    };
-  }
-  
-  render() {
-    return (
-      <View style={styles.container}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={this.props.type === 'from' ? styles.inputFrom : styles.inputTo}
-            underlineColorAndroid='rgba(0,0,0,0)'
-            onChangeText={(text) => this.setState({text})}
-            value={this.state.text}
-            keyboardType='numeric' />
-          <Text style={this.props.type === 'from' ? styles.valueFrom : styles.valueTo}>{this.state.text}</Text>
-        </View>
-        <TouchableOpacity
-           style={styles.currencyContainer}
-           onPress={this.props.openCurrencyList}>
-          <Text style={this.props.type === 'from' ? styles.currencyFrom : styles.currencyTo}>{this.props.currency}</Text>
-          <Image
-            style={styles.currencyChevron}
-            source={this.props.type === 'from' ? require('../assets/images/chevron-primary.png') : require('../assets/images/chevron-secondary.png')} />
-        </TouchableOpacity>
+export default function Input (props) {
+  return (
+    <View style={styles.container}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={props.type === 'from' ? styles.inputFrom : styles.inputTo}
+          underlineColorAndroid='rgba(0,0,0,0)'
+          onChangeText={(value) => props.setValue(value)}
+          value={props.value}
+          keyboardType='numeric' />
+        <Text style={props.type === 'from' ? styles.valueFrom : styles.valueTo}>{props.value}</Text>
       </View>
-    );
-  }
+      <TouchableOpacity
+        style={styles.currencyContainer}
+        onPress={() => props.openCurrencyList(props.type)}>
+        <Text style={props.type === 'from' ? styles.currencyFrom : styles.currencyTo}>{props.currency}</Text>
+        <Image
+          style={styles.currencyChevron}
+          source={props.type === 'from' ? require('../assets/images/chevron-primary.png') : require('../assets/images/chevron-secondary.png')} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+Input.propTypes = {
+  value: PropTypes.string,
+  type: PropTypes.string,
+  onChangeText: PropTypes.func,
+  openCurrencyList: PropTypes.func,
+  setValue: PropTypes.func,
 }
 
 const styles = StyleSheet.create({

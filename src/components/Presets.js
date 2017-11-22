@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
@@ -7,35 +7,34 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class Presets extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Exchange presets</Text>
-        <TouchableOpacity style={styles.preset}>
-          <Text style={styles.currencyFrom}>EUR</Text>
-          <Image
-            style={styles.arrows}
-            source={require('../assets/images/arrows.png')} />
-          <Text style={styles.currencyTo}>USD</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.preset}>
-          <Text style={styles.currencyFrom}>GBP</Text>
-          <Image
-            style={styles.arrows}
-            source={require('../assets/images/arrows.png')} />
-          <Text style={styles.currencyTo}>USD</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.preset}>
-          <Text style={styles.currencyFrom}>RUB</Text>
-          <Image
-            style={styles.arrows}
-            source={require('../assets/images/arrows.png')} />
-          <Text style={styles.currencyTo}>EUR</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+export default function Presets (props) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Exchange presets</Text>
+      {
+        props.presets.map((item, index) => {
+          return (
+            <TouchableOpacity
+              key={index}
+              style={styles.preset}
+              onPress={() => props.changePreset(item.currencyFrom, item.currencyTo)}
+              onLongPress={(e) => props.editPreset(e, index)}>
+              <View 
+                style={styles.presetInner}
+                pointerEvents='none'>
+                <Text style={styles.currencyFrom}>{item.currencyFrom}</Text>
+                <Image
+                  style={styles.arrows}
+                  source={require('../assets/images/arrows.png')} />
+                <Text style={styles.currencyTo}>{item.currencyTo}</Text>
+              </View>
+            </TouchableOpacity>
+          )
+        })
+      }
+      <Text style={styles.hint}>To change preset, press and hold the currency you want to change.</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -55,8 +54,10 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: '#6e7a8f',
     borderRadius: 50,
-    paddingVertical: 14,
     marginBottom: 20,
+  },
+  presetInner: {
+    paddingVertical: 14,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -75,4 +76,10 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginRight: 20,
   },
+  hint: {
+    color: '#6e7a8f',
+    fontSize: 10,
+    paddingHorizontal: 20,
+    textAlign: 'center',
+  }
 });

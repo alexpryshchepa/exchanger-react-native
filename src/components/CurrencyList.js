@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   StyleSheet,
   View,
@@ -8,59 +9,48 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class CurrencyList extends Component {  
-  render() {
-    return (
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scroller}>
-          <Text style={styles.title}>Select currency</Text>
-          <TouchableOpacity 
-            style={styles.close}
-            onPress={this.props.closeCurrencyList}>
-            <Image
-              style={{width: 15, height: 15}}
-              source={require('../assets/images/close.png')} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonActive}>
-            <Text style={styles.buttonActiveAbbreviation}>EUR</Text>
-            <Text style={styles.buttonActiveName}>European euro</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>ALL</Text>
-            <Text style={styles.buttonCommonName}>Albanian lek</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>DZD</Text>
-            <Text style={styles.buttonCommonName}>Algerian dinar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>ALL</Text>
-            <Text style={styles.buttonCommonName}>Albanian lek</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>DZD</Text>
-            <Text style={styles.buttonCommonName}>Algerian dinar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>ALL</Text>
-            <Text style={styles.buttonCommonName}>Albanian lek</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>DZD</Text>
-            <Text style={styles.buttonCommonName}>Algerian dinar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>ALL</Text>
-            <Text style={styles.buttonCommonName}>Albanian lek</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCommon}>
-            <Text style={styles.buttonCommonAbbreviation}>DZD</Text>
-            <Text style={styles.buttonCommonName}>Algerian dinar</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-    );
-  }
+export default function CurrencyList (props) {
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scroller}>
+        <Text style={styles.title}>Select currency</Text>
+        <TouchableOpacity 
+          style={styles.close}
+          onPress={props.closeCurrencyList}>
+          <Image
+            style={{width: 15, height: 15}}
+            source={require('../assets/images/close.png')} />
+        </TouchableOpacity>
+        {
+          props.names.map((name, index) => {
+            return (
+              <TouchableOpacity 
+                style={styles.buttonCommon}
+                key={index}
+                onPress={() => props.currencyListStatus === 'edit'
+                  ? props.editPresetCurrencyType(name)
+                  : props.changeCurrencyType(name) }>
+                <View 
+                  style={styles.buttonInner}
+                  pointerEvents='none'>
+                  <Text style={styles.buttonCommonAbbr}>{name}</Text>
+                  <Text 
+                    style={styles.buttonCommonName}
+                    numberOfLines={1}>{props.fullNames[name]}</Text>
+                </View>
+              </TouchableOpacity>
+            )
+          })
+        }
+      </ScrollView>
+    </View>
+  );
+}
+
+CurrencyList.propTypes = {
+  list: PropTypes.array,
+  changeCurrencyType: PropTypes.func,
+  fullNames: PropTypes.object,
 }
 
 const styles = StyleSheet.create({
@@ -87,24 +77,11 @@ const styles = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center',
   },
-  buttonActive: {
-    width: '100%',
-    backgroundColor: '#00fffe',
-    borderRadius: 50,
+  buttonInner: {
     paddingVertical: 14,
     paddingHorizontal: 30,
-    marginBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  buttonActiveAbbreviation: {
-    color: '#273348',
-    fontSize: 24,
-    marginRight: 14,
-  },
-  buttonActiveName: {
-    color: '#273348',
-    fontSize: 18,
   },
   buttonCommon: {
     width: '100%',
@@ -112,13 +89,9 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: '#6e7a8f',
     borderRadius: 50,
-    paddingVertical: 14,
-    paddingHorizontal: 30,
     marginBottom: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
-  buttonCommonAbbreviation: {
+  buttonCommonAbbr: {
     color: '#fff',
     fontSize: 24,
     marginRight: 14,
@@ -126,5 +99,6 @@ const styles = StyleSheet.create({
   buttonCommonName: {
     color: '#fff',
     fontSize: 18,
+    flex: 1,
   },
 });
