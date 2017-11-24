@@ -22,12 +22,12 @@ export default function CurrencyList (props) {
             source={require('../assets/images/close.png')} />
         </TouchableOpacity>
         {
-          props.names.map((name, index) => {
+          props.namesAbbr.map((name, index) => {
             return (
               <TouchableOpacity 
                 style={styles.buttonCommon}
                 key={index}
-                onPress={() => props.currencyListStatus === 'edit'
+                onPress={() => props.currencyListType.substring(0, 4) === 'edit'
                   ? props.editPresetCurrencyType(name)
                   : props.changeCurrencyType(name) }>
                 <View 
@@ -36,7 +36,7 @@ export default function CurrencyList (props) {
                   <Text style={styles.buttonCommonAbbr}>{name}</Text>
                   <Text 
                     style={styles.buttonCommonName}
-                    numberOfLines={1}>{props.fullNames[name]}</Text>
+                    numberOfLines={1}>{props.namesFull[name]}</Text>
                 </View>
               </TouchableOpacity>
             )
@@ -48,9 +48,10 @@ export default function CurrencyList (props) {
 }
 
 CurrencyList.propTypes = {
-  list: PropTypes.array,
   changeCurrencyType: PropTypes.func,
-  fullNames: PropTypes.object,
+  namesAbbr: PropTypes.array,
+  namesFull: PropTypes.object,
+  currencyListType: PropTypes.string,
 }
 
 const styles = StyleSheet.create({

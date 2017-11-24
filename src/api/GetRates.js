@@ -1,5 +1,5 @@
 export default function GetRates(base, cb, error) {
-  let url = 'http://api.fixer.io/latest?base=' + base;
+  let url = 'https://api.fixer.io/latest?base=' + base;
   fetch(url)
     .then(response => {
     if (response.status === 200) {
@@ -9,10 +9,10 @@ export default function GetRates(base, cb, error) {
       error();
     }
   }).then(function (data) {
-    let names = [];
+    let namesAbbr = [];
     for (let key in data.rates) {
-      names.push(String(key));
+      namesAbbr.push(String(key));
     }
-    cb(data, names);
+    cb(data, namesAbbr);
   })
 }

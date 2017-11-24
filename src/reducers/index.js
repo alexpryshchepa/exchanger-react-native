@@ -1,11 +1,15 @@
 import { combineReducers } from 'redux';
 
-import loading from './loading';
+import data from './data';
+import load from './load';
 import converter from './converter';
 import presets from './presets';
+import currencyList from './currencyList';
 
 export default combineReducers({
-  loading,
+  data,
+  load,
   converter,
   presets,
+  currencyList,
 });

@@ -3,7 +3,7 @@ const initialState = {
   refresh: false,
 };
 
-export default function loading (state = initialState, action) {
+export default function load (state = initialState, action) {
   switch(action.type) {
     case 'APP_LOADING_SUCCESS':
       return {

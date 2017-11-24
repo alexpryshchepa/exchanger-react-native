@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { 
-  View,
-  InteractionManager,
-} from 'react-native';
+import { View } from 'react-native';
 
 import Exchanger from '../containers/Exchanger';
 
@@ -17,9 +14,9 @@ import * as actions from '../actions';
 
 class App extends Component {
   componentDidMount () {
-    const currencyFrom = this.props.currencyFrom;
-    const valueFrom = this.props.valueFrom;
-    const currencyTo = this.props.currencyTo;
+    let currencyFrom = this.props.currencyFrom;
+    let valueFrom = this.props.valueFrom;
+    let currencyTo = this.props.currencyTo;
 
     this.props.onRefreshFetch(currencyFrom, valueFrom, currencyTo);
   }
@@ -30,24 +27,28 @@ class App extends Component {
   }
     
   refreshFetch () {
-    const currencyFrom = this.props.currencyFrom;
-    const valueFrom = this.props.valueFrom;
-    const currencyTo = this.props.currencyTo;
+    let currencyFrom = this.props.currencyFrom;
+    let valueFrom = this.props.valueFrom;
+    let currencyTo = this.props.currencyTo;
     
     this.props.onRefreshFetch(currencyFrom, valueFrom, currencyTo);
   }
     
-  toggleCurrencyList (type) {
-    this.props.onToggleCurrencyList(!this.props.currencyList, typeof type === 'string' ? type : '' );
+  openCurrencyList (type) {
+    this.props.onToggleCurrencyList(!this.props.currencyListVisibility, type);
+  }
+  
+  closeCurrencyList () {
+    this.props.onToggleCurrencyList(!this.props.currencyListVisibility);
   }
     
   changeCurrencyType (curr) {
-    const currency = curr;
-    const currencyTo = this.props.currencyTo; // just for "onChangeCurrencyFrom" action
-    const valueFrom = this.props.valueFrom;
-    const valueTo = Math.round((this.props.rates[currency]*this.props.valueFrom)*100)/100; // normalized value
-    const ratesLocal = this.props.ratesLocal;
-    const isRatesLocal = () => {
+    let currency = curr;
+    let currencyTo = this.props.currencyTo; // just for "onChangeCurrencyFrom" action
+    let valueFrom = this.props.valueFrom;
+    let valueTo = Math.round((this.props.ratesActive[currency]*this.props.valueFrom)*100)/100; // normalized value
+    let ratesLocal = this.props.ratesLocal;
+    let isRatesLocal = () => {
       if (currency in this.props.ratesLocal) {
         return true;
       }
@@ -55,18 +56,34 @@ class App extends Component {
     };
     
     this.props.currencyListType === 'from'
-      ? this.props.onChangeCurrencyFrom(isRatesLocal, ratesLocal, currency, valueFrom, !this.props.currencyList, currencyTo)
-      : this.props.onChangeCurrencyTo(isRatesLocal, ratesLocal, currency, valueTo, !this.props.currencyList)
+      ? this.props.onChangeCurrencyFrom(isRatesLocal, ratesLocal, currency, valueFrom, currencyTo, !this.props.currencyListVisibility)
+      : this.props.onChangeCurrencyTo(currency, valueTo, !this.props.currencyListVisibility)
   }
   
   editPresetCurrencyType (curr) {
-    const currency = curr;
-    const presets = this.props.presets;
-    const presetIndex = this.props.presetIndex;
+    let currency = curr;
+    let presetsList = this.props.presetsList;
+    let preset = +this.props.currencyListPresetIndex; // convert to number
     
-    this.props.currencyListType === 'edit-from'
-      ? this.props.onEditPresetCurrencyFrom(!this.props.currencyList, presetIndex)
-      : this.props.onEditPresetCurrencyTo(!this.props.currencyList, presetIndex)
+    if (this.props.currencyListType === 'edit-from') {
+      let newPresetsList = presetsList.map((item, index) => {
+        if (index === preset) {
+          item.currencyFrom = currency;
+        }
+        return item;
+      });
+      
+      this.props.onEditPresetCurrencyFrom(newPresetsList, !this.props.currencyListVisibility);
+    } else {
+      let newPresetsList = presetsList.map((item, index) => {
+        if (index === preset) {
+          item.currencyTo = currency;
+        }
+        return item;
+      });
+      
+      this.props.onEditPresetCurrencyTo(newPresetsList, !this.props.currencyListVisibility);
+    }
   }
   
   render() {
@@ -87,20 +104,20 @@ class App extends Component {
           ) : null
         }
         {
-          this.props.currencyList ? (
+          this.props.currencyListVisibility ? (
             <View style={{ zIndex: 2, position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
               <CurrencyList
-                currencyListStatus={this.props.currencyListStatus}
-                closeCurrencyList={this.toggleCurrencyList.bind(this)}
+                namesAbbr={this.props.namesAbbr}
+                namesFull={this.props.namesFull}
+                currencyListType={this.props.currencyListType}
+                closeCurrencyList={this.closeCurrencyList.bind(this)}
                 changeCurrencyType={this.changeCurrencyType.bind(this)}
-                editPresetCurrencyType={this.editPresetCurrencyType.bind(this)}
-                names={this.props.names}
-                fullNames={this.props.fullNames} />
+                editPresetCurrencyType={this.editPresetCurrencyType.bind(this)} />
             </View>
           ) : null
         }
         <View style={{ zIndex: 1 }}>
-          <Exchanger openCurrencyList={this.toggleCurrencyList.bind(this)} />
+          <Exchanger openCurrencyList={this.openCurrencyList.bind(this)} />
         </View>
       </View>
     );
@@ -109,21 +126,29 @@ class App extends Component {
 
 export default connect(
   state => ({
-    loading: state.loading.loading,
-    refresh: state.loading.refresh,
-    currencyList: state.converter.currencyList,
-    currencyListType: state.converter.currencyListType,
-    currencyListStatus: state.converter.currencyListStatus,
-    names: state.converter.names,
-    fullNames: state.converter.fullNames,
-    rates: state.converter.rates,
+    // load states
+    loading: state.load.loading,
+    refresh: state.load.refresh,
+    
+    // data states
+    ratesActive: state.data.ratesActive,
+    ratesLocal: state.data.ratesLocal,
+    namesAbbr: state.data.namesAbbr,
+    namesFull: state.data.namesFull,
+    
+    // converter states
     currencyFrom: state.converter.currencyFrom,
     currencyTo: state.converter.currencyTo,
     valueFrom: state.converter.valueFrom,
     valueTo: state.converter.valueTo,
-    ratesLocal: state.converter.ratesLocal,
-    presets: state.presets.list,
-    presetIndex: state.converter.currencyListPresetIndex,
+    
+    // currencyList states
+    currencyListVisibility: state.currencyList.visibility,
+    currencyListType: state.currencyList.type,
+    currencyListPresetIndex: state.currencyList.preset,
+    
+    // presets states
+    presetsList: state.presets.list,
   }),
   dispatch => ({
     onAppLoaded: (currencyFrom) => {
@@ -133,35 +158,36 @@ export default connect(
       dispatch(actions.refreshFetch());
       dispatch(actions.getRates(currencyFrom, valueFrom, currencyTo));
     },
-    onToggleCurrencyList: (state, type) => {
-      dispatch(actions.toggleCurrencyList(state, type));
+    onToggleCurrencyList: (visibility, type) => {
+      dispatch(actions.toggleCurrencyList(visibility, type));
     },
-    onChangeCurrencyFrom: (isRatesLocal, ratesLocal, currencyFrom, value, listState, currencyTo) => {
+    onChangeCurrencyFrom: (isRatesLocal, ratesLocal, currencyFrom, valueFrom, currencyTo, currencyListState) => {
       if (isRatesLocal()) {
-        const names = [];
+        const namesAbbr = [];
+        
         for (let key in ratesLocal[currencyFrom].rates) {
-          names.push(String(key));
+          namesAbbr.push(String(key));
         }
         
-        dispatch(actions.getRatesLocal(ratesLocal, names, currencyFrom, value, currencyTo));
+        dispatch(actions.getRatesLocal(ratesLocal, namesAbbr, currencyFrom, valueFrom, currencyTo));
       } else {
         dispatch(actions.refreshFetch());
-        dispatch(actions.getRates(currencyFrom, value, currencyTo));
+        dispatch(actions.getRates(currencyFrom, valueFrom, currencyTo));
       }
       
-      dispatch(actions.toggleCurrencyList(listState));
+      dispatch(actions.toggleCurrencyList(currencyListState));
     },
-    onChangeCurrencyTo: (isRatesLocal, ratesLocal, currencyTo, value, listState) => {
-      dispatch(actions.сhangeCurrencyTo(currencyTo, value));
-      dispatch(actions.toggleCurrencyList(listState));
+    onChangeCurrencyTo: (currency, value, currencyListState) => {
+      dispatch(actions.сhangeCurrencyTo(currency, value));
+      dispatch(actions.toggleCurrencyList(currencyListState));
     },
-    onEditPresetCurrencyFrom: (listState, currency, presetIndex) => {
-      dispatch(actions.editPresetCurrencyFrom(currency, presetIndex));
-      dispatch(actions.toggleCurrencyList(listState));
+    onEditPresetCurrencyFrom: (presetsList, currencyListState) => {
+      dispatch(actions.editPresetCurrency(presetsList));
+      dispatch(actions.toggleCurrencyList(currencyListState));
     },
-    onEditPresetCurrencyTo: (listState, currency, presetIndex) => {
-      dispatch(actions.editPresetCurrencyTo(currency, presetIndex));
-      dispatch(actions.toggleCurrencyList(listState));
+    onEditPresetCurrencyTo: (presetsList, currencyListState) => {
+      dispatch(actions.editPresetCurrency(presetsList));
+      dispatch(actions.toggleCurrencyList(currencyListState));
     },
   })
 )(App)

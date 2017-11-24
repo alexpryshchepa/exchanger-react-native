@@ -18,7 +18,8 @@ export default function Input (props) {
           underlineColorAndroid='rgba(0,0,0,0)'
           onChangeText={(value) => props.setValue(value)}
           value={props.value}
-          keyboardType='numeric' />
+          keyboardType='numeric'
+          maxLength={15} />
         <Text style={props.type === 'from' ? styles.valueFrom : styles.valueTo}>{props.value}</Text>
       </View>
       <TouchableOpacity

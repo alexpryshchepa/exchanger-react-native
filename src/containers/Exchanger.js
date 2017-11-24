@@ -13,8 +13,8 @@ class Exchanger extends Component {
   handleExchangeFrom (value) {
     const re = /^([0-9]{1,}([\.]{1}([0-9]{1,2})?)?)?$/;
     
-    const valueFrom = value;
-    const valueTo = Math.round(Number(value)*this.props.rates[this.props.currencyTo]*100)/100; // normalized value
+    let valueFrom = value;
+    let valueTo = Math.round(Number(value)*this.props.ratesActive[this.props.currencyTo]*100)/100; // normalized value
     
     re.test(valueFrom) ? this.props.onHandleExchangeFrom(valueFrom, valueTo) : false
   }
@@ -22,16 +22,16 @@ class Exchanger extends Component {
   handleExchangeTo (value) {
     const re = /^([0-9]{1,}([\.]{1}([0-9]{1,2})?)?)?$/;
     
-    const valueFrom = Math.round(Number(value)/this.props.rates[this.props.currencyTo]*100)/100; // normalized value
-    const valueTo = value;
+    let valueFrom = Math.round(Number(value)/this.props.ratesActive[this.props.currencyTo]*100)/100; // normalized value
+    let valueTo = value;
     
     re.test(valueTo) ? this.props.onHandleExchangeTo(valueFrom, valueTo) : false
   }
   
   changePreset (currencyFrom, currencyTo) {
-    const valueFrom = this.props.valueFrom;
-    const ratesLocal = this.props.ratesLocal;
-    const isRatesLocal = () => {
+    let valueFrom = this.props.valueFrom;
+    let ratesLocal = this.props.ratesLocal;
+    let isRatesLocal = () => {
       if (currencyFrom in this.props.ratesLocal) {
         return true;
       }
@@ -42,26 +42,28 @@ class Exchanger extends Component {
   }
   
   invertConverter () {
-    const currencyFrom = this.props.currencyTo; // inverted value
-    const currencyTo = this.props.currencyFrom; // inverted value
-    const ratesLocal = this.props.ratesLocal;
-    const isRatesLocal = () => {
+    let currencyFrom = this.props.currencyTo; // inverted value
+    let valueFrom = this.props.valueFrom; 
+    let currencyTo = this.props.currencyFrom; // inverted value
+    let ratesLocal = this.props.ratesLocal;
+    let isRatesLocal = () => {
       if (currencyFrom in this.props.ratesLocal) {
         return true;
       }
       return false;
     };
     
-    this.props.onInvertConverter(isRatesLocal, ratesLocal, currencyFrom, this.props.valueFrom, currencyTo);
+    this.props.onInvertConverter(isRatesLocal, ratesLocal, currencyFrom, valueFrom, currencyTo);
   }
   
   editPreset (e, index) {
     const width = 125;
+    let indexStr = index.toString(); // convert to string for condition ||
     
     if (e.nativeEvent.locationX > width) {
-      this.props.onEditPresetTo(!this.props.currencyList, 'edit-to', 'edit', index);
+      this.props.onEditPresetTo(!this.props.currencyListVisibility, 'edit-to', indexStr);
     } else {
-      this.props.onEditPresetFrom(!this.props.currencyList, 'edit-from', 'edit', index);
+      this.props.onEditPresetFrom(!this.props.currencyListVisibility, 'edit-from', indexStr);
     }
   }
   
@@ -78,7 +80,7 @@ class Exchanger extends Component {
           setValueTo={this.handleExchangeTo.bind(this)}
           invertConverter={this.invertConverter.bind(this)} />
         <Presets
-          presets={this.props.presets}
+          presets={this.props.presetsList}
           changePreset={this.changePreset.bind(this)}
           editPreset={this.editPreset.bind(this)} />
       </ScrollView>
@@ -88,14 +90,21 @@ class Exchanger extends Component {
 
 export default connect(
   state => ({
-    rates: state.converter.rates,
+    // data states
+    ratesActive: state.data.ratesActive,
+    ratesLocal: state.data.ratesLocal,
+    
+    // converter states
     currencyFrom: state.converter.currencyFrom,
     currencyTo: state.converter.currencyTo,
     valueFrom: state.converter.valueFrom,
     valueTo: state.converter.valueTo,
-    ratesLocal: state.converter.ratesLocal,
-    presets: state.presets.list,
-    currencyList: state.converter.currencyList,
+    
+    // currencyList states
+    currencyListVisibility: state.currencyList.visibility,
+    
+    // presets states
+    presetsList: state.presets.list,
   }),
   dispatch => ({
     onHandleExchangeFrom: (valueFrom, valueTo) => {
@@ -106,12 +115,13 @@ export default connect(
     },
     onChangePreset: (isRatesLocal, ratesLocal, currencyFrom, valueFrom, currencyTo) => {
       if (isRatesLocal()) {
-        const names = [];
+        const namesAbbr = [];
+        
         for (let key in ratesLocal[currencyFrom].rates) {
-          names.push(String(key));
+          namesAbbr.push(String(key));
         }
         
-        dispatch(actions.getRatesLocal(ratesLocal, names, currencyFrom, valueFrom, currencyTo));
+        dispatch(actions.getRatesLocal(ratesLocal, namesAbbr, currencyFrom, valueFrom, currencyTo));
       } else {
         dispatch(actions.refreshFetch());
         dispatch(actions.getRates(currencyFrom, valueFrom, currencyTo));
@@ -119,22 +129,23 @@ export default connect(
     },
     onInvertConverter: (isRatesLocal, ratesLocal, currencyFrom, valueFrom, currencyTo) => {
       if (isRatesLocal()) {
-        const names = [];
+        const namesAbbr = [];
+        
         for (let key in ratesLocal[currencyFrom].rates) {
-          names.push(String(key));
+          namesAbbr.push(String(key));
         }
         
-        dispatch(actions.getRatesLocal(ratesLocal, names, currencyFrom, valueFrom, currencyTo));
+        dispatch(actions.getRatesLocal(ratesLocal, namesAbbr, currencyFrom, valueFrom, currencyTo));
       } else {
         dispatch(actions.refreshFetch());
         dispatch(actions.getRates(currencyFrom, valueFrom, currencyTo));
       }
     },
-    onEditPresetFrom: (state, type, status, presetIndex) => {
-      dispatch(actions.toggleCurrencyList(state, type, status, presetIndex));
+    onEditPresetFrom: (visibility, type, preset) => {
+      dispatch(actions.toggleCurrencyList(visibility, type, preset));
     },
-    onEditPresetTo: (state, type, status) => {
-      dispatch(actions.toggleCurrencyList(state, type, status, presetIndex));
+    onEditPresetTo: (visibility, type, preset) => {
+      dispatch(actions.toggleCurrencyList(visibility, type, preset));
     },
   })
 )(Exchanger)

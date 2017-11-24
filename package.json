@@ -13,6 +13,7 @@
     "react-native-spinkit": "^1.1.1",
     "react-native-text-input-mask": "^0.5.2",
     "redux": "^3.7.2",
+    "redux-persist": "^5.4.0",
     "redux-thunk": "^2.2.0"
   },
   "devDependencies": {

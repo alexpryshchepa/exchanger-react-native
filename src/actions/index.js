@@ -1,13 +1,11 @@
 import * as types from '../constants/ActionTypes';
 import GetRates from '../api/GetRates';
 
-export const getRates = (currencyFrom, valueFrom, currencyTo) => dispatch => GetRates(currencyFrom, function (data, names) {
+export const getRates = (currencyFrom, valueFrom, currencyTo) => dispatch => GetRates(currencyFrom, function (data, namesAbbr) {
   dispatch({
     type: types.FETCH_RATES_SUCCESS,
-    rates: data.rates,
-    names: names,
-    currencyFrom: currencyFrom,
-    valueFrom: valueFrom,
+    ratesActive: data.rates,
+    namesAbbr: namesAbbr,
   });
   if (currencyTo) {
     const valueTo = data.rates[currencyTo] !== undefined 
@@ -16,8 +14,8 @@ export const getRates = (currencyFrom, valueFrom, currencyTo) => dispatch => Get
     
     dispatch({
       type: types.CURRENCY_TO_CHANGED,
-      currencyTo: currencyTo,
-      valueTo: valueTo,
+      currency: currencyTo,
+      value: valueTo,
     })
   }
   dispatch({
@@ -30,6 +28,11 @@ export const getRates = (currencyFrom, valueFrom, currencyTo) => dispatch => Get
       [currencyFrom]: data,
     },
   });
+  dispatch({
+    type: types.CURRENCY_FROM_CHANGED,
+    currency: currencyFrom,
+    value: valueFrom,
+  });
 }, function () {
   dispatch({
     type: types.APP_LOADING_FAIL,
@@ -38,13 +41,16 @@ export const getRates = (currencyFrom, valueFrom, currencyTo) => dispatch => Get
   });
 });
 
-export const getRatesLocal = (ratesLocal, names, currencyFrom, valueFrom, currencyTo) => dispatch => {
+export const getRatesLocal = (ratesLocal, namesAbbr, currencyFrom, valueFrom, currencyTo) => dispatch => {
   dispatch({
     type: types.GET_RATES_SUCCESS,
-    rates: ratesLocal[currencyFrom].rates,
-    names: names,
-    currencyFrom: currencyFrom,
-    valueFrom: valueFrom,
+    ratesActive: ratesLocal[currencyFrom].rates,
+    namesAbbr: namesAbbr,
+  });
+  dispatch({
+    type: types.CURRENCY_FROM_CHANGED,
+    currency: currencyFrom,
+    value: valueFrom,
   });
   if (currencyTo) {
     const valueTo = ratesLocal[currencyFrom].rates[currencyTo] !== undefined // change
@@ -53,8 +59,8 @@ export const getRatesLocal = (ratesLocal, names, currencyFrom, valueFrom, curren
 
     dispatch({
       type: types.CURRENCY_TO_CHANGED,
-      currencyTo: currencyTo,
-      valueTo: valueTo,
+      currency: currencyTo,
+      value: valueTo,
     })
   }
 }
@@ -65,12 +71,11 @@ export const refreshFetch = () => ({
   refresh: false,
 });
 
-export const toggleCurrencyList = (state, type, status, presetIndex) => ({
-  type: types.TOGGLE_CURRENCY_LIST,
-  currencyList: state,
-  currencyListType: type,
-  currencyListStatus: status,
-  currencyListPresetIndex: presetIndex,
+export const toggleCurrencyList = (visibility, type, preset) => ({
+  type: types.CURRENCY_LIST_VISIBILITY_CHANGED,
+  visibility: visibility,
+  listType: type || false,
+  preset: preset || false,
 });
 
 export const handleExchange = (valueFrom, valueTo) => ({
@@ -81,40 +86,17 @@ export const handleExchange = (valueFrom, valueTo) => ({
 
 export const changeCurrencyFrom = (currency, value) => ({
   type: types.CURRENCY_FROM_CHANGED,
-  currencyFrom: currency,
-  valueFrom: value,
+  currency: currency,
+  value: value,
 });
 
 export const сhangeCurrencyTo = (currency, value) => ({
   type: types.CURRENCY_TO_CHANGED,
-  currencyTo: currency,
-  valueTo: value,
+  currency: currency,
+  value: value,
 });
 
-export const editPresetCurrencyFrom = () => ({
-  type: types.PRESET_CURRENCY_FROM_CHANGED,
-  presets: [
-    {
-      currencyFrom: 'USD',
-      currencyTo: 'MXN',
-    },
-    {
-      currencyFrom: 'CNY',
-      currencyTo: 'IDR',
-    },
-  ]
-});
-
-export const editPresetCurrencyTo = () => ({
-  type: types.PRESET_CURRENCY_TO_CHANGED,
-  presets: [
-    {
-      currencyFrom: 'PHP',
-      currencyTo: 'GBP',
-    },
-    {
-      currencyFrom: 'IDR',
-      currencyTo: 'CNY',
-    },
-  ]
+export const editPresetCurrency = (presetsList) => ({
+  type: types.PRESET_CURRENCY_CHANGED,
+  presets: presetsList,
 });

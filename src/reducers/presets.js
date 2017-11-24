@@ -13,13 +13,7 @@ const initialState = {
 
 export default function presets (state = initialState, action) {
   switch(action.type) {
-    case 'PRESET_CURRENCY_FROM_CHANGED':
-      return {
-        ...state,
-        list: action.presets,
-      }
-      break
-    case 'PRESET_CURRENCY_TO_CHANGED':
+    case 'PRESET_CURRENCY_CHANGED':
       return {
         ...state,
         list: action.presets,
