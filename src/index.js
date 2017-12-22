@@ -1,14 +1,41 @@
 import React, { Component } from 'react';
-import { Platform } from 'react-native';
+import { 
+  Platform,
+  AsyncStorage,
+} from 'react-native';
+import { 
+  persistStore,
+  persistCombineReducers,
+} from 'redux-persist';
+import { PersistGate } from 'redux-persist/lib/integration/react';
 import App from './containers/App';
 import { Provider } from 'react-redux';
-import { createStore, applyMiddleware, compose } from 'redux';
+import { 
+  createStore,
+  applyMiddleware,
+  compose,
+} from 'redux';
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'remote-redux-devtools';
-import reducer from './reducers';
+import reducers from './reducers';
+
+const config = {
+  key: 'root',
+  storage: AsyncStorage,
+}
+
+const reducer = persistCombineReducers(config, {reducers});
 
 function configureStore() {
-  const store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));
+  const store = createStore(
+    reducer,
+    compose(
+      applyMiddleware(thunk),
+      composeWithDevTools()
+    )
+  );
+  
+  const persistor = persistStore(store);
   
   if (module.hot) {
     module.hot.accept(() => {
@@ -17,16 +44,18 @@ function configureStore() {
     });
   }
   
-  return store;
+  return { persistor, store };
 }
 
-const store = configureStore();
+const { persistor, store } = configureStore();
 
 export default class Root extends Component {
   render () {
     return (
       <Provider store={store}>
-        <App />
+        <PersistGate persistor={persistor}>
+          <App />
+        </PersistGate>
       </Provider>
     )
   }

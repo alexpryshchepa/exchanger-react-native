@@ -91,20 +91,20 @@ class Exchanger extends Component {
 export default connect(
   state => ({
     // data states
-    ratesActive: state.data.ratesActive,
-    ratesLocal: state.data.ratesLocal,
+    ratesActive: state.reducers.data.ratesActive,
+    ratesLocal: state.reducers.data.ratesLocal,
     
     // converter states
-    currencyFrom: state.converter.currencyFrom,
-    currencyTo: state.converter.currencyTo,
-    valueFrom: state.converter.valueFrom,
-    valueTo: state.converter.valueTo,
+    currencyFrom: state.reducers.converter.currencyFrom,
+    currencyTo: state.reducers.converter.currencyTo,
+    valueFrom: state.reducers.converter.valueFrom,
+    valueTo: state.reducers.converter.valueTo,
     
     // currencyList states
-    currencyListVisibility: state.currencyList.visibility,
+    currencyListVisibility: state.reducers.currencyList.visibility,
     
     // presets states
-    presetsList: state.presets.list,
+    presetsList: state.reducers.presets.list,
   }),
   dispatch => ({
     onHandleExchangeFrom: (valueFrom, valueTo) => {

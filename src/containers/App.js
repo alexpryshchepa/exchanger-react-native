@@ -6,6 +6,7 @@ import Exchanger from '../containers/Exchanger';
 
 import Refresh from '../components/Refresh';
 import Loader from '../components/Loader';
+import NoConnection from '../components/NoConnection';
 import CurrencyList from '../components/CurrencyList';
 
 import GetRates from '../api/GetRates';
@@ -18,7 +19,7 @@ class App extends Component {
     let valueFrom = this.props.valueFrom;
     let currencyTo = this.props.currencyTo;
 
-    this.props.onRefreshFetch(currencyFrom, valueFrom, currencyTo);
+    this.props.onAppLoaded(currencyFrom, valueFrom, currencyTo);
   }
   
   // hack for preventing "Maximum update depth exceeded" error
@@ -91,7 +92,7 @@ class App extends Component {
       <View style={{ flex: 1, backgroundColor: '#273348' }}>
         {
           this.props.loading ? (
-            <View style={{ zIndex: 4, position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
+            <View style={{ zIndex: 3, position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
               <Loader />
             </View>
           ) : null
@@ -100,6 +101,13 @@ class App extends Component {
           this.props.refresh ? (
             <View style={{ zIndex: 3, position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
               <Refresh onPress={this.refreshFetch.bind(this)} />
+            </View>
+          ) : null
+        }
+        {
+          false ? (
+            <View style={{ zIndex: 3, position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
+              <NoConnection />
             </View>
           ) : null
         }
@@ -127,32 +135,32 @@ class App extends Component {
 export default connect(
   state => ({
     // load states
-    loading: state.load.loading,
-    refresh: state.load.refresh,
+    loading: state.reducers.load.loading,
+    refresh: state.reducers.load.refresh,
     
     // data states
-    ratesActive: state.data.ratesActive,
-    ratesLocal: state.data.ratesLocal,
-    namesAbbr: state.data.namesAbbr,
-    namesFull: state.data.namesFull,
+    ratesActive: state.reducers.data.ratesActive,
+    ratesLocal: state.reducers.data.ratesLocal,
+    namesAbbr: state.reducers.data.namesAbbr,
+    namesFull: state.reducers.data.namesFull,
     
     // converter states
-    currencyFrom: state.converter.currencyFrom,
-    currencyTo: state.converter.currencyTo,
-    valueFrom: state.converter.valueFrom,
-    valueTo: state.converter.valueTo,
+    currencyFrom: state.reducers.converter.currencyFrom,
+    currencyTo: state.reducers.converter.currencyTo,
+    valueFrom: state.reducers.converter.valueFrom,
+    valueTo: state.reducers.converter.valueTo,
     
     // currencyList states
-    currencyListVisibility: state.currencyList.visibility,
-    currencyListType: state.currencyList.type,
-    currencyListPresetIndex: state.currencyList.preset,
+    currencyListVisibility: state.reducers.currencyList.visibility,
+    currencyListType: state.reducers.currencyList.type,
+    currencyListPresetIndex: state.reducers.currencyList.preset,
     
     // presets states
-    presetsList: state.presets.list,
+    presetsList: state.reducers.presets.list,
   }),
   dispatch => ({
-    onAppLoaded: (currencyFrom) => {
-      dispatch(actions.getRates(currencyFrom));
+    onAppLoaded: (currencyFrom, valueFrom, currencyTo) => {
+      dispatch(actions.getRates(currencyFrom, valueFrom, currencyTo));
     },
     onRefreshFetch: (currencyFrom, valueFrom, currencyTo) => {
       dispatch(actions.refreshFetch());
